@@ -1,0 +1,105 @@
+/* styles.css */
+
+/* Define custom colors */
+:root {
+    --yellow-cmyk: 10, 0, 100, 0;
+    --yellow-rgb: 252, 255, 0;
+    --yellow-hex: #fcff00;
+    --yellow-pantone: #ffd700;
+  
+    --pink-cmyk: 0, 100, 15, 0;
+    --pink-rgb: 255, 0, 122;
+    --pink-hex: #ff007a;
+    --pink-pantone: #ff007a;
+  
+    --purple-cmyk: 81, 80, 0, 0;
+    --purple-rgb: 86, 0, 239;
+    --purple-hex: #5600ef;
+    --purple-pantone: #5600ef;
+  
+    --green-cmyk: 77, 0, 90, 0;
+    --green-rgb: 0, 255, 137;
+    --green-hex: #00ff89;
+    --green-pantone: #00ff89;
+  
+    --white-hex: #ffffff;
+    --black-hex: #000000; /* Added black color */
+  }
+  
+  /* Header styling */
+  header {
+    background-color: var(--green-hex); /* Green background color */
+    padding: 20px 0; /* Add padding to the top and bottom */
+  }
+  
+  /* Body styling */
+  body {
+    font-family: 'Epilogue', sans-serif;
+    background-color: var(--white-hex); /* White background */
+    color: var(--pink-hex); /* Pink as main text color */
+  }
+  
+  /* Container styling inside main */
+  main .container {
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 3rem;
+  }
+  
+  /* Form label styling */
+  .form-label {
+    font-weight: bold;
+    color: var(--pink-hex); /* Pink for form labels */
+  }
+  
+  /* Textarea styling */
+  textarea {
+    resize: none;
+  }
+  
+  /* Button styling */
+  .btn-primary {
+    background-color: var(--pink-hex); /* Pink for primary buttons */
+    border-color: var(--pink-hex);
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--purple-hex); /* Purple on hover */
+    border-color: var(--purple-hex);
+  }
+  
+  .btn-primary:focus,
+  .btn-primary.focus {
+    box-shadow: 0 0 0 0.2rem var(--pink-hex); /* Pink shadow on focus */
+  }
+  
+  /* Heading styling */
+  h1, h3 {
+    color: var(--purple-hex); /* Purple headings */
+    text-transform: uppercase;
+    font-family: 'Anton', sans-serif;
+  }
+  
+  /* Logo styling */
+  .logo {
+  width: 100px; /* Adjust the width as needed */
+  height: auto; /* Automatically adjust the height to maintain aspect ratio */
+  }
+  
+  /* Footer styling */
+  footer {
+  background-color: var(--black-hex); /* Black background */
+  color: var(--white-hex); /* White text color */
+  padding: 20px 0; /* Add padding to the top and bottom */
+  margin-top: 5rem; /* Same margin as container */
+  text-align: center; /* Center-align text */
+  }
+  
+  /* Footer heading styling */
+  footer h3 {
+  color: var(--yellow-hex); /* Yellow headings */
+  text-transform: uppercase;
+  font-family: 'Anton', sans-serif;
+  }
+  
