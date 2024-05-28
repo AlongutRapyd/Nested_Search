@@ -57,6 +57,11 @@
   textarea {
     resize: none;
   }
+
+  /* Result textarea hover styling */
+  #output:hover {
+    cursor: not-allowed;
+  }
   
   /* Button styling */
   .btn-primary {
