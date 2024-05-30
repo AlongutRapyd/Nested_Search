@@ -14,29 +14,88 @@
 <body>
   <header>
     <div class="container mt-7">
-      <img class="logo" src="img/Rapyd-logo.png"></img>
+      <img class="logo" src="img/Rapyd-logo.png" alt="Rapyd Logo">
       <h1 class="mb-7"><i class="fas fa-cogs"></i> Nested Search Query Builder</h1>
     </div>
   </header>
 
   <main>
     <div class="container">
-      <div class="row">
-        <div class="col-lg-6">
+      <div class="mb-3">
+        <label class="form-label">Select Query Type:</label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="queryType" id="nestedQueryRadio" value="nested" checked onclick="handleConvertButtonClick()">
+          <label class="form-check-label" for="nestedQueryRadio">Nested Query</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="queryType" id="alertQueryRadio" value="alert" onclick="handleConvertButtonClick()">
+          <label class="form-check-label" for="alertQueryRadio">Alert Query</label>
+        </div>
+      </div>
+
+      <div id="nestedQueryInput" class="row">
+        <div class="col-lg-6" id="nestedJsonInputCol">
           <label for="jsonInput" class="form-label"><i class="fas fa-search"></i> Enter OpenSearch Request:</label>
           <textarea class="form-control mb-3" id="jsonInput" rows="10"></textarea>
           <button class="btn btn-primary mt-3" onclick="convertJson()">
             <i class="fas fa-magic"></i> Convert
           </button>
         </div>
-        <div class="col-lg-6">
-          <label for="output" class="form-label"><i class="fas fa-file-alt"></i> Nested Query Result:</label>
-          <textarea class="form-control mb-3" id="output" rows="10" readonly></textarea>
-          <button class="btn btn-primary mt-3" onclick="copyOutput()">
+        <div class="col-lg-6" id="nestedOutputCol">
+          <label for="nestedOutput" class="form-label"><i class="fas fa-file-alt"></i> Query Result:</label>
+          <textarea class="form-control mb-3" id="nestedOutput" rows="10" readonly></textarea>
+          <button class="btn btn-primary mt-3" onclick="copyOutput('nestedOutput')">
             <i class="fas fa-copy"></i> Copy Output
           </button>
         </div>
       </div>
+
+      <div id="alertQueryInput" style="display: none;">
+        <div class="row">
+            <div class="col-lg-6">
+                <label for="alertTimeFrame" class="form-label"><i class="fas fa-clock"></i> Alert Time Frame:</label>
+                <select class="form-select mb-3" id="alertTimeFrame">
+                    <option value="now-10m">Last 10 minutes</option>
+                    <option value="now-30m">Last 30 minutes</option>
+                    <option value="now-1h">Last 1 hour</option>
+                    <option value="now-3h">Last 3 hours</option>
+                    <option value="now-6h">Last 6 hours</option>
+                    <option value="now-12h">Last 12 hours</option>
+                    <option value="now-1d">Last 24 hours</option>
+                    <option value="now-7d">Last 7 days</option>
+                    <option value="now-30d">Last 30 days</option>
+                </select>
+                <div id="queryInputs"></div>
+                <button class="btn btn-primary mt-3" onclick="addQueryInput()">
+                    <i class="fas fa-plus"></i> Add Condition
+                </button>
+                <button class="btn btn-primary mt-3" onclick="convertAlert()">
+                    <i class="fas fa-magic"></i> Convert
+                </button>
+            </div>
+            <div class="col-lg-6">
+                <label for="alertOutput" class="form-label"><i class="fas fa-file-alt"></i> Query Result:</label>
+                <textarea class="form-control mb-3" id="alertOutput" rows="10" readonly></textarea>
+                <button class="btn btn-primary mt-3" onclick="copyOutput('alertOutput')">
+                    <i class="fas fa-copy"></i> Copy Output
+                </button>
+            </div>
+        </div>
+    </div>    
+
+      <!-- Template for query input -->
+      <template id="queryInputTemplate">
+        <div class="condition-container mb-3">
+          <input class="form-control" type="text" placeholder="Key" required>
+          <select class="form-select mt-2" required>
+            <option value="AND">AND</option>
+            <option value="OR">OR</option>
+            <option value="NOT">NOT</option>
+          </select>
+          <input class="form-control mt-2" type="text" placeholder="Value" required>
+          <button class="btn btn-danger remove-condition-btn mt-2" onclick="removeQueryInput(this)">Remove</button>
+        </div>
+      </template>
     </div>
   </main>
 

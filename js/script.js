@@ -35,15 +35,144 @@ function convertJson() {
       }, []);
   
       const output = `${must_not_phrases.join(' ')} ${other_clauses.join(' ')}`.trim();
-      document.getElementById('output').value = output;
+      document.getElementById('nestedOutput').value = output;
     } catch (error) {
-      document.getElementById('output').value = 'Invalid input!';
+      document.getElementById('nestedOutput').value = 'Invalid input!';
     }
   }
   
   
-      function copyOutput() {
-        var outputTextarea = document.getElementById('output');
-        outputTextarea.select();  
-        document.execCommand('copy');
-      }
+  function copyOutput(outputId) {
+    var outputTextarea = document.getElementById(outputId);
+    outputTextarea.select();  
+    document.execCommand('copy');
+}
+
+
+      function handleConvertButtonClick() {
+        const nestedQueryRadio = document.getElementById('nestedQueryRadio');
+        const alertQueryRadio = document.getElementById('alertQueryRadio');
+        const nestedJsonInputCol = document.getElementById('nestedJsonInputCol');
+        const nestedOutputCol = document.getElementById('nestedOutputCol');
+        
+        if (nestedQueryRadio.checked) {
+            // Display the nested query input fields
+            nestedJsonInputCol.classList.add('col-lg-6');
+            nestedOutputCol.classList.add('col-lg-6');
+            nestedJsonInputCol.style.display = 'block';
+            nestedOutputCol.style.display = 'block';
+            document.getElementById('alertQueryInput').style.display = 'none';
+        } else if (alertQueryRadio.checked) {
+            // Display the alert query input fields
+            nestedJsonInputCol.classList.remove('col-lg-6');
+            nestedOutputCol.classList.remove('col-lg-6');
+            nestedJsonInputCol.style.display = 'none';
+            nestedOutputCol.style.display = 'none';
+            document.getElementById('alertQueryInput').style.display = 'block';
+        } else {
+            // Neither radio button is selected, handle accordingly
+            console.error('No query type selected');
+        }
+    }       
+
+    let conditionCount = 0; // Initialize a counter for condition IDs
+
+    function addQueryInput() {
+        const queryInputs = document.getElementById('queryInputs');
+        const template = document.getElementById('queryInputTemplate');
+        const clone = template.content.cloneNode(true);
+    
+        // Increment the condition counter to generate a unique ID for the condition container
+        conditionCount++;
+    
+        // Create a unique ID for the condition container
+        const conditionId = `condition_${conditionCount}`;
+    
+        // Set the ID for the cloned template element
+        clone.querySelector('.condition-container').id = conditionId;
+    
+        // Append the cloned template to the parent container
+        queryInputs.appendChild(clone);
+    }
+    
+    function removeQueryInput(button) {
+        const conditionContainer = button.parentNode;
+        conditionContainer.remove();
+    }
+
+    function convertAlert() {
+      const alertTimeFrame = document.getElementById('alertTimeFrame').value;
+  
+      // Retrieve all condition inputs
+      const conditionInputs = document.querySelectorAll('#queryInputs > div');
+  
+      // Initialize arrays to store filter conditions
+      const mustFilters = [];
+      const filterConditions = [];
+      const mustNotFilters = [];
+  
+      // Loop through each condition input
+      conditionInputs.forEach((conditionInput) => {
+          // Retrieve key and value of each condition
+          const key = conditionInput.querySelector('input[placeholder="Key"]').value.trim();
+          const value = conditionInput.querySelector('input[placeholder="Value"]').value.trim();
+  
+          // Construct the match_phrase object for the condition
+          const matchPhrase = {
+              query: value,
+              slop: 0,
+              zero_terms_query: "NONE",
+              boost: 1
+          };
+  
+          // Construct the match_phrase filter object
+          const matchPhraseFilter = { match_phrase: { [key]: matchPhrase } };
+  
+          // Check if it's a must or must_not filter
+          const operator = conditionInput.querySelector('select').value;
+          if (operator === 'NOT') {
+              mustNotFilters.push(matchPhraseFilter);
+          } else {
+              if (operator === 'AND') {
+                  filterConditions.push(matchPhraseFilter);
+              } else {
+                  // If OR, push to mustFilters
+                  mustFilters.push(matchPhraseFilter);
+              }
+          }
+      });
+  
+      // Construct the range object for the time frame
+      const timeRange = {
+          range: {
+              time: {
+                  from: alertTimeFrame,
+                  to: "now",
+                  include_lower: true,
+                  include_upper: true,
+                  boost: 1
+              }
+          }
+      };
+  
+      // Construct the query object
+      const query = {
+          size: 0,
+          query: {
+              bool: {
+                  must: [timeRange].concat(mustFilters),
+                  filter: filterConditions,
+                  must_not: mustNotFilters,
+                  adjust_pure_negative: true,
+                  boost: 1
+              }
+          }
+      };
+  
+      // Convert the query object to JSON string with indentation for readability
+      const outputJson = JSON.stringify(query, null, 4);
+  
+      // Display the generated query in the output textarea
+      document.getElementById('alertOutput').value = outputJson;
+  }
+  
