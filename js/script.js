@@ -96,83 +96,85 @@ function convertJson() {
     }
     
     function removeQueryInput(button) {
-        const conditionContainer = button.parentNode;
-        conditionContainer.remove();
-    }
-
-    function convertAlert() {
-      const alertTimeFrame = document.getElementById('alertTimeFrame').value;
-  
-      // Retrieve all condition inputs
-      const conditionInputs = document.querySelectorAll('#queryInputs > div');
-  
-      // Initialize arrays to store filter conditions
-      const mustFilters = [];
-      const filterConditions = [];
-      const mustNotFilters = [];
-  
-      // Loop through each condition input
-      conditionInputs.forEach((conditionInput) => {
-          // Retrieve key and value of each condition
-          const key = conditionInput.querySelector('input[placeholder="Key"]').value.trim();
-          const value = conditionInput.querySelector('input[placeholder="Value"]').value.trim();
-  
-          // Construct the match_phrase object for the condition
-          const matchPhrase = {
-              query: value,
-              slop: 0,
-              zero_terms_query: "NONE",
-              boost: 1
-          };
-  
-          // Construct the match_phrase filter object
-          const matchPhraseFilter = { match_phrase: { [key]: matchPhrase } };
-  
-          // Check if it's a must or must_not filter
-          const operator = conditionInput.querySelector('select').value;
-          if (operator === 'NOT') {
-              mustNotFilters.push(matchPhraseFilter);
-          } else {
-              if (operator === 'AND') {
-                  filterConditions.push(matchPhraseFilter);
-              } else {
-                  // If OR, push to mustFilters
-                  mustFilters.push(matchPhraseFilter);
-              }
-          }
-      });
-  
-      // Construct the range object for the time frame
-      const timeRange = {
-          range: {
-              time: {
-                  from: alertTimeFrame,
-                  to: "now",
-                  include_lower: true,
-                  include_upper: true,
-                  boost: 1
-              }
-          }
-      };
-  
-      // Construct the query object
-      const query = {
-          size: 0,
-          query: {
-              bool: {
-                  must: [timeRange].concat(mustFilters),
-                  filter: filterConditions,
-                  must_not: mustNotFilters,
-                  adjust_pure_negative: true,
-                  boost: 1
-              }
-          }
-      };
-  
-      // Convert the query object to JSON string with indentation for readability
-      const outputJson = JSON.stringify(query, null, 4);
-  
-      // Display the generated query in the output textarea
-      document.getElementById('alertOutput').value = outputJson;
+      const conditionContainer = button.closest('.condition-container');
+      if (conditionContainer) {
+          conditionContainer.remove();
+      }
   }
   
+  function convertAlert() {
+    const alertTimeFrameElement = document.getElementById('alertTimeFrame');
+    if (!alertTimeFrameElement) {
+        console.error('Alert time frame element not found.');
+        return;
+    }
+
+    const alertTimeFrame = alertTimeFrameElement.value;
+
+    // Retrieve all condition inputs
+    const conditionInputs = document.querySelectorAll('#queryInputs .condition-container');
+
+    // Initialize arrays to store filter conditions
+    const mustFilters = [];
+    const filterConditions = [];
+    const mustNotFilters = [];
+
+    // Loop through each condition input
+    conditionInputs.forEach((conditionInput) => {
+        // Retrieve key and value of each condition
+        const keyInput = conditionInput.querySelector('input[placeholder="Key"]');
+        const valueInput = conditionInput.querySelector('input[placeholder="Value"]');
+
+        if (keyInput && valueInput) {
+            const key = keyInput.value.trim();
+            const value = valueInput.value.trim();
+
+            // Construct the match_phrase object for the condition
+            const matchPhrase = {
+                query: value,
+                slop: 0,
+                zero_terms_query: "NONE",
+                boost: 1
+            };
+
+            // Construct the match_phrase filter object
+            const matchPhraseFilter = { match_phrase: { [key]: matchPhrase } };
+
+            // Push to filterConditions array as "AND" operation
+            filterConditions.push(matchPhraseFilter);
+        }
+    });
+
+    // Construct the range object for the time frame
+    const timeRange = {
+        range: {
+            time: {
+                from: alertTimeFrame,
+                to: "now",
+                include_lower: true,
+                include_upper: true,
+                boost: 1
+            }
+        }
+    };
+
+    // Construct the query object
+    const query = {
+        size: 0,
+        query: {
+            bool: {
+                must: [timeRange].concat(mustFilters),
+                filter: filterConditions,
+                must_not: mustNotFilters,
+                adjust_pure_negative: true,
+                boost: 1
+            }
+        }
+    };
+
+    // Convert the query object to JSON string with indentation for readability
+    const outputJson = JSON.stringify(query, null, 4);
+
+    // Display the generated query in the output textarea
+    document.getElementById('alertOutput').value = outputJson;
+}

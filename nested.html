@@ -83,19 +83,22 @@
         </div>
     </div>    
 
-      <!-- Template for query input -->
-      <template id="queryInputTemplate">
-        <div class="condition-container mb-3">
-          <input class="form-control" type="text" placeholder="Key" required>
-          <select class="form-select mt-2" required>
-            <option value="AND">AND</option>
-            <option value="OR">OR</option>
-            <option value="NOT">NOT</option>
-          </select>
-          <input class="form-control mt-2" type="text" placeholder="Value" required>
-          <button class="btn btn-danger remove-condition-btn mt-2" onclick="removeQueryInput(this)">Remove</button>
-        </div>
-      </template>
+<!-- Template for query input -->
+<template id="queryInputTemplate">
+  <div class="condition-container mb-3 row">
+    <div class="col-md-5 align-self-center">
+      <label for="keyInput" class="form-label">Key:</label>
+      <input id="keyInput" class="form-control" type="text" placeholder="Key" required>
+    </div>
+    <div class="col-md-5 align-self-center">
+      <label for="valueInput" class="form-label">Value:</label>
+      <input id="valueInput" class="form-control" type="text" placeholder="Value" required>
+    </div>
+    <div class="col-md-2 align-self-center">
+      <button class="btn btn-danger remove-condition-btn w-100" onclick="removeQueryInput(this)">Remove</button>
+    </div>
+  </div>
+</template>
     </div>
   </main>
 
