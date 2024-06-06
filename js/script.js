@@ -178,3 +178,83 @@ function convertJson() {
     // Display the generated query in the output textarea
     document.getElementById('alertOutput').value = outputJson;
 }
+
+function handleQueryMethodChange() {
+  const conditionQuerySection = document.getElementById('conditionQuerySection');
+  const jsonQuerySection = document.getElementById('jsonQuerySection');
+  const conditionQueryRadio = document.getElementById('conditionQueryRadio');
+  const jsonQueryRadio = document.getElementById('jsonQueryRadio');
+
+  if (conditionQueryRadio.checked) {
+      conditionQuerySection.style.display = 'block';
+      jsonQuerySection.style.display = 'none';
+  } else if (jsonQueryRadio.checked) {
+      conditionQuerySection.style.display = 'none';
+      jsonQuerySection.style.display = 'block';
+  }
+}
+
+function convertJsonQuery() {
+  const inputJsonStr = document.getElementById('jsonInput2').value.trim(); // Update the ID here
+  const alertTimeFrame = document.getElementById('alertTimeFrame2').value;
+
+  if (!inputJsonStr) { // Check if inputJsonStr is empty
+      document.getElementById('jsonOutput2').value = "Error: Input JSON is empty."; // Update the ID here
+      return;
+  }
+
+  try {
+      const inputJson = JSON.parse(inputJsonStr);
+      const outputJson = generateOutputJsonQuery(inputJson, alertTimeFrame); // Pass inputJson and alertTimeFrame to generateOutputJsonQuery()
+      document.getElementById('jsonOutput2').value = JSON.stringify(outputJson, null, 4); // Update the ID here
+  } catch (error) {
+      document.getElementById('jsonOutput2').value = "Error parsing input JSON: " + error.message; // Update the ID here
+  }
+}
+
+function generateOutputJsonQuery(inputJson, alertTimeFrame) {
+  const outputJson = {
+      size: 0,
+      query: {
+          bool: {
+              must: [],
+              filter: [],
+              must_not: [],
+              adjust_pure_negative: true,
+              boost: 1
+          }
+      }
+  };
+
+  // Construct the range object for the time frame
+  const timeRange = {
+      range: {
+          time: {
+              from: alertTimeFrame,
+              to: "now",
+              include_lower: true,
+              include_upper: true,
+              boost: 1
+          }
+      }
+  };
+
+  // Set the time range filter
+  outputJson.query.bool.must.push(timeRange);
+
+  // Set the query from input JSON
+  if (inputJson && inputJson.query) {
+      const inputQuery = inputJson.query;
+      if (inputQuery.bool && inputQuery.bool.filter) {
+          const timeFilterIndex = inputQuery.bool.filter.findIndex(filter => filter.range && filter.range.time);
+          if (timeFilterIndex !== -1) {
+              inputQuery.bool.filter.splice(timeFilterIndex, 1); // Remove the time range filter
+          }
+          outputJson.query.bool.filter.push(inputQuery.bool.filter);
+      }
+  }
+
+  return outputJson;
+}
+
+
