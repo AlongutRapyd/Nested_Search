@@ -250,7 +250,7 @@ function generateOutputJsonQuery(inputJson, alertTimeFrame) {
           if (timeFilterIndex !== -1) {
               inputQuery.bool.filter.splice(timeFilterIndex, 1); // Remove the time range filter
           }
-          outputJson.query.bool.filter.push(inputQuery.bool.filter);
+          outputJson.query.bool.filter = outputJson.query.bool.filter.concat(inputQuery.bool.filter);
       }
   }
 
