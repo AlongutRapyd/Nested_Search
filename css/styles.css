@@ -92,18 +92,28 @@
   height: auto; /* Automatically adjust the height to maintain aspect ratio */
   }
   
-  /* Footer styling */
-  footer {
-  background-color: var(--black-hex); /* Black background */
-  color: var(--white-hex); /* White text color */
-  padding: 20px 0; /* Add padding to the top and bottom */
-  margin-top: 5rem; /* Same margin as container */
-  text-align: center; /* Center-align text */
-  }
-  
-  /* Footer heading styling */
-  footer h3 {
-  color: var(--yellow-hex); /* Yellow headings */
-  text-transform: uppercase;
-  font-family: 'Anton', sans-serif;
-  }
+/* Footer styling */
+footer {
+  background-color: var(--black-hex);
+  color: var(--white-hex);
+}
+
+/* Footer content styling */
+footer h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+footer p {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+footer ul li {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+footer ul li i {
+  margin-right: 0.5rem;
+}
