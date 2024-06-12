@@ -257,4 +257,90 @@ function generateOutputJsonQuery(inputJson, alertTimeFrame) {
   return outputJson;
 }
 
+function generateEmails() {
+  var payoutData = document.getElementById('payoutData').value.trim();
+
+  if (!payoutData) {
+      showAlert('Please paste payout data.');
+      return;
+  }
+
+  var payouts = parsePayoutData(payoutData);
+
+  if (payouts.length === 0) {
+      showAlert('No valid payout data found.');
+      return;
+  }
+
+  var outputDiv = document.getElementById('output');
+  outputDiv.innerHTML = '';
+
+  var emails = generateEmailsByGateway(payouts);
+  emails.forEach(email => {
+      outputDiv.innerHTML += email;
+  });
+}
+
+function parsePayoutData(data) {
+  var lines = data.split('\n');
+  var payouts = [];
+
+  // Start from 1 to skip the header row
+  for (var i = 1; i < lines.length; i++) {
+      var columns = lines[i].split('\t');
+
+      // Check if the columns are valid
+      if (columns.length >= 11) {
+          var payoutDetails = {
+              gatewayName: columns[3],
+              payoutToken: columns[1],
+              externalId: columns[2],
+              createdDate: columns[6],
+              amount: columns[10]
+          };
+
+          payouts.push(payoutDetails);
+      }
+  }
+
+  return payouts;
+}
+
+function generateEmailsByGateway(payouts) {
+  var emails = {};
+  payouts.forEach(payout => {
+      if (!emails[payout.gatewayName]) {
+          emails[payout.gatewayName] = '<div class="alert alert-primary" role="alert"><h4>' + payout.gatewayName + '</h4>Dear Team,<br>I hope this email finds you well.<br>May you please assist us and clarify for us what is the status of the following payouts for ' + payout.gatewayName + '?<br>In case it failed, please let us know what was the failure reason.<br>In case the payout is closed may you please provide us proof of deposit?<br><br><table class="table table-bordered"><thead class="table-light"><tr><th>Payout Token</th><th>External Id</th><th>Created Date</th><th>Amount</th></tr></thead><tbody>';
+      }
+      emails[payout.gatewayName] += '<tr>';
+      emails[payout.gatewayName] += '<td>' + payout.payoutToken + '</td>';
+      emails[payout.gatewayName] += '<td>' + payout.externalId + '</td>';
+      emails[payout.gatewayName] += '<td>' + payout.createdDate + '</td>';
+      emails[payout.gatewayName] += '<td>' + payout.amount + '</td>';
+      emails[payout.gatewayName] += '</tr>';
+  });
+  for (var gatewayName in emails) {
+      emails[gatewayName] += '</tbody></table>Looking forward to your response.<br>Best Regards,</div>';
+  }
+  return Object.values(emails);
+}
+
+function showAlert(message) {
+  var alertDiv = document.createElement('div');
+  alertDiv.classList.add('alert', 'alert-danger', 'mt-3'); // Add margin top for spacing
+  alertDiv.textContent = message;
+  
+  // Get the parent element of the textarea and the button
+  var form = document.getElementById('payoutsForm');
+  
+  // Insert the alert before the button
+  form.insertBefore(alertDiv, form.querySelector('button'));
+  
+  // Remove the alert after 3 seconds
+  setTimeout(function() {
+      alertDiv.remove();
+  }, 3000);
+}
+
+
 
