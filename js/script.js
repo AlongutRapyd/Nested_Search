@@ -342,5 +342,34 @@ function showAlert(message) {
   }, 3000);
 }
 
+function extractPaymentTokens() {
+  const inputData = document.getElementById('inputData').value.trim();
+
+  // Regular expression to match payment tokens like "payment_..."
+  const paymentTokenRegex = /payment_[\w-]+/g;
+  const tokens = [];
+  let match;
+
+  // Find all matches in the inputData using regex
+  while ((match = paymentTokenRegex.exec(inputData)) !== null) {
+      tokens.push(match[0]); // Push the matched token into the array
+  }
+
+  // Display extracted tokens in the UI
+  displayPaymentTokens(tokens);
+}
+
+function displayPaymentTokens(tokens) {
+  const list = document.getElementById('paymentTokensList');
+  list.innerHTML = ''; // Clear previous content
+
+  tokens.forEach(token => {
+      const listItem = document.createElement('li');
+      listItem.className = 'list-group-item';
+      listItem.textContent = token;
+      list.appendChild(listItem);
+  });
+}
+
 
 
