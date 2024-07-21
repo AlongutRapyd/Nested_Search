@@ -202,3 +202,35 @@ footer ul li i {
   animation-delay: 0.3s;
 }
 
+/* Token containers */
+.token-container {
+  display: none; /* Show token containers as flex to allow side-by-side display */
+  flex-wrap: nowrap; /* Ensure tokens are in a row and scrollable */
+  gap: 20px;
+  margin-top: 20px;
+  overflow-x: auto; /* Enable horizontal scrolling */
+}
+
+.token-box {
+  width: 50%; /* Set width to 50% for side-by-side layout */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 300px;
+  overflow-y: auto;
+}
+
+.token-box h3 {
+  margin-bottom: 10px;
+}
+
+.token-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.token-list li {
+  margin-bottom: 5px;
+}
+
+

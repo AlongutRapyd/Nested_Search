@@ -347,8 +347,8 @@ function extractPaymentAndPayoutTokens() {
 
   // Check if input data is empty
   if (!inputData) {
-    showError('Input data is empty.');
-    return;
+      showError('Input data is empty.');
+      return;
   }
 
   // Split the input data into words
@@ -360,39 +360,44 @@ function extractPaymentAndPayoutTokens() {
 
   // Iterate through the words to find payment_token and payout_token
   for (let i = 0; i < words.length; i++) {
-    if (words[i] === 'payment_token:') {
-      if (i + 1 < words.length) {
-        paymentTokens.push(words[i + 1]);
+      if (words[i] === 'payment_token:') {
+          if (i + 1 < words.length) {
+              let token = words[i + 1].replace(/['",]+/g, ''); // Remove ' and " characters
+              paymentTokens.push(token);
+          }
+      } else if (words[i] === 'payout_token:') {
+          if (i + 1 < words.length) {
+              let token = words[i + 1].replace(/['",]+/g, ''); // Remove ' and " characters
+              payoutTokens.push(token);
+          }
       }
-    } else if (words[i] === 'payout_token:') {
-      if (i + 1 < words.length) {
-        payoutTokens.push(words[i + 1]);
-      }
-    }
   }
 
-  // Prepare output in ordered list format
-  let output = '<div>Payment Tokens:<ol>';
-  paymentTokens.forEach((token, index) => {
-    output += `<li>${token}</li>`;
-  });
-  output += '</ol></div>';
+  // Prepare output strings
+  let paymentOutput = '';
+  let payoutOutput = '';
 
-  output += '<div>Payout Tokens:<ol>';
-  payoutTokens.forEach((token, index) => {
-    output += `<li>${token}</li>`;
-  });
-  output += '</ol></div>';
+  if (paymentTokens.length > 0) {
+      paymentOutput = paymentTokens.map(token => `<li>${token}</li>`).join('');
+  } else {
+      paymentOutput = '<li>No payment tokens found.</li>';
+  }
+
+  if (payoutTokens.length > 0) {
+      payoutOutput = payoutTokens.map(token => `<li>${token}</li>`).join('');
+  } else {
+      payoutOutput = '<li>No payout tokens found.</li>';
+  }
 
   // Display the output
-  const outputDiv = document.getElementById('output');
-  outputDiv.innerHTML = output;
-  outputDiv.style.display = 'block';
-}
+  const paymentTokensList = document.getElementById('paymentTokensList');
+  const payoutTokensList = document.getElementById('payoutTokensList');
 
-function showError(message) {
-  const outputDiv = document.getElementById('output');
-  outputDiv.innerHTML = `<p>Error: ${message}</p>`;
-  outputDiv.style.display = 'block';
-}
+  // Update token lists
+  paymentTokensList.innerHTML = paymentOutput;
+  payoutTokensList.innerHTML = payoutOutput;
 
+  // Show token containers if tokens are found
+  const tokenContainer = document.getElementById('output');
+  tokenContainer.style.display = 'flex'; // Set display to flex to show tokens side by side
+}
