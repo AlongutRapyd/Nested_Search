@@ -28,7 +28,7 @@
   
   /* Header styling */
   header {
-    background-color: var(--green-hex); /* Green background color */
+    background-color: var(--white-hex); /* Green background color */
     padding: 20px 0; /* Add padding to the top and bottom */
   }
   
@@ -118,20 +118,87 @@ footer ul li i {
   margin-right: 0.5rem;
 }
 
-nav ul.navbar-nav li.nav-item {
-  display: inline-block;
+/* Navbar styling */
+.navbar {
+  position: fixed; /* Fixed position */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000; /* Ensure it's above other content */
+  background-color: var(--pink-hex);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 10px 0;
+  transition: top 0.3s; /* Smooth transition for top property */
+}
+
+.navbar-brand {
+  color: var(--purple-hex);
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex; /* Flexbox for aligning items */
+  align-items: center; /* Center vertically */
+}
+
+.navbar-brand img {
+  height: 30px;
+  width: auto;
+  margin-right: 10px;
+  transition: transform 0.3s ease; /* Smooth image scale on hover */
+}
+
+.navbar-brand:hover {
+  color: var(--purple-hex);
+}
+
+.navbar-brand:hover img {
+  transform: scale(1.1); /* Scale up the logo on hover */
+}
+
+.navbar-nav {
+  margin-left: auto; /* Push nav links to the right */
+}
+
+.navbar-nav .nav-item {
   margin-left: 20px;
 }
 
-nav ul.navbar-nav li.nav-item a.nav-link {
-  color: #333;
-  text-decoration: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  transition: background-color 0.3s;
+.navbar-nav .nav-link {
+  color: var(--black-hex);
+  font-size: 1rem;
+  text-transform: uppercase;
+  transition: color 0.3s;
 }
 
-nav ul.navbar-nav li.nav-item a.nav-link:hover {
-  background-color: #f8f9fa;
+.navbar-nav .nav-link:hover {
+  color: var(--purple-hex);
+}
+
+/* Animation for nav links */
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.navbar-nav .nav-link {
+  animation: slideInFromLeft 0.5s ease forwards;
+  opacity: 0; /* Initial opacity */
+}
+
+.navbar-nav .nav-link:nth-child(1) {
+  animation-delay: 0.1s; /* Delay for each link */
+}
+
+.navbar-nav .nav-link:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.navbar-nav .nav-link:nth-child(3) {
+  animation-delay: 0.3s;
 }
 
