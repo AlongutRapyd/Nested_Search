@@ -342,34 +342,57 @@ function showAlert(message) {
   }, 3000);
 }
 
-function extractPaymentTokens() {
+function extractPaymentAndPayoutTokens() {
   const inputData = document.getElementById('inputData').value.trim();
 
-  // Regular expression to match payment tokens like "payment_..."
-  const paymentTokenRegex = /payment_[\w-]+/g;
-  const tokens = [];
-  let match;
-
-  // Find all matches in the inputData using regex
-  while ((match = paymentTokenRegex.exec(inputData)) !== null) {
-      tokens.push(match[0]); // Push the matched token into the array
+  // Check if input data is empty
+  if (!inputData) {
+    showError('Input data is empty.');
+    return;
   }
 
-  // Display extracted tokens in the UI
-  displayPaymentTokens(tokens);
-}
+  // Split the input data into words
+  const words = inputData.split(/\s+/);
 
-function displayPaymentTokens(tokens) {
-  const list = document.getElementById('paymentTokensList');
-  list.innerHTML = ''; // Clear previous content
+  // Arrays to store tokens
+  let paymentTokens = [];
+  let payoutTokens = [];
 
-  tokens.forEach(token => {
-      const listItem = document.createElement('li');
-      listItem.className = 'list-group-item';
-      listItem.textContent = token;
-      list.appendChild(listItem);
+  // Iterate through the words to find payment_token and payout_token
+  for (let i = 0; i < words.length; i++) {
+    if (words[i] === 'payment_token:') {
+      if (i + 1 < words.length) {
+        paymentTokens.push(words[i + 1]);
+      }
+    } else if (words[i] === 'payout_token:') {
+      if (i + 1 < words.length) {
+        payoutTokens.push(words[i + 1]);
+      }
+    }
+  }
+
+  // Prepare output in ordered list format
+  let output = '<div>Payment Tokens:<ol>';
+  paymentTokens.forEach((token, index) => {
+    output += `<li>${token}</li>`;
   });
+  output += '</ol></div>';
+
+  output += '<div>Payout Tokens:<ol>';
+  payoutTokens.forEach((token, index) => {
+    output += `<li>${token}</li>`;
+  });
+  output += '</ol></div>';
+
+  // Display the output
+  const outputDiv = document.getElementById('output');
+  outputDiv.innerHTML = output;
+  outputDiv.style.display = 'block';
 }
 
-
+function showError(message) {
+  const outputDiv = document.getElementById('output');
+  outputDiv.innerHTML = `<p>Error: ${message}</p>`;
+  outputDiv.style.display = 'block';
+}
 
