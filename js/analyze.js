@@ -1,9 +1,11 @@
+// analyze.js
+
 function analyzeLogs() {
   // Get the logs from the textarea
   const logs = document.getElementById('logInput').value;
 
   // Display loading message
-  document.getElementById('analysisResults').innerHTML = '<div class="text-center mb-4"><p class="lead">Analyzing logs, please wait...</p></div>';
+  document.getElementById('analysisResults').innerHTML = '<div class="text-center mb-4"><p class="lead"><i class="fas fa-spinner fa-spin"></i> Analyzing logs, please wait...</p></div>';
 
   // Extract the total number of hits
   const totalHitsPattern = /"hits":\s*{[^}]*"total":\s*(\d+)/;
@@ -27,6 +29,87 @@ function analyzeLogs() {
     }
   }
 
+// Function to extract and format request and response details from connectors service hits
+function extractConnectorsServiceDetails(hits) {
+  const connectorsServiceDetails = [];
+
+  hits.forEach(hit => {
+    const source = hit._source;
+
+    // Check if label matches '_connectors_service'
+    if (/.*_connectors_service/.test(source.label)) {
+      const message = source.message || '';
+      const params = source.params || '';
+
+      // Find request logs
+      if ((/makeRawRequest/.test(message) || /makeCustomRequest/.test(message)) &&
+      (/options_data/.test(message) || /input/.test(message))) {
+        connectorsServiceDetails.push({
+          label: source.label || 'N/A',
+          level: source.level || 'N/A',
+          message: message,
+          time: source.time || 'N/A',
+          params: `Request: ${params}`,
+          type: 'request'
+        });
+      }
+
+      // Find response logs
+      if (/makeRawRequest/.test(message) && (/response/.test(message) || /error/.test(message))) {
+        connectorsServiceDetails.push({
+          label: source.label || 'N/A',
+          level: source.level || 'N/A',
+          message: message,
+          time: source.time || 'N/A',
+          params: `Response: ${params}`,
+          type: 'response'
+        });
+      }
+    }
+  });
+
+  return connectorsServiceDetails;
+}
+
+  // Function to generate HTML for connectors service details
+  function generateConnectorsServiceHtml(details) {
+    let html = '<h3 class="mt-4">Connectors Service Details</h3>';
+    
+    details.forEach((detail, index) => {
+      html += `
+        <div class="card mb-3 shadow-sm border-danger">
+          <div class="card-header bg-danger text-white">
+            <h5 class="card-title mb-0">${detail.type.charAt(0).toUpperCase() + detail.type.slice(1)} ${index + 1} <i class="fas fa-exclamation-triangle"></i></h5>
+          </div>
+          <div class="card-body">
+            <div class="row mb-2">
+              <div class="col-sm-3"><strong>Label:</strong></div>
+              <div class="col-sm-9"><span class="badge bg-secondary">${detail.label}</span></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-sm-3"><strong>Level:</strong></div>
+              <div class="col-sm-9"><span class="badge bg-warning text-dark">${detail.level}</span></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-sm-3"><strong>Message:</strong></div>
+              <div class="col-sm-9">${detail.message}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-sm-3"><strong>Time:</strong></div>
+              <div class="col-sm-9">${detail.time}</div>
+            </div>
+            <details class="mt-3">
+              <summary class="btn btn-danger btn-sm"><i class="fas fa-cogs"></i> Show Params</summary>
+              <pre><code>${detail.params}</code></pre>
+            </details>
+          </div>
+        </div>
+      `;
+    });
+
+    return html;
+  }
+
   // Function to extract and format detailed information
   function extractDetails(hit) {
     return {
@@ -43,12 +126,56 @@ function analyzeLogs() {
     return patterns.some(pattern => pattern.test(logEntry));
   }
 
+  // Function to extract unique important details from the params field without JSON parsing
+  function extractUniqueDetails(hits) {
+    const uniqueDetails = {};
+
+    // Define exact field names to look for and their regular expressions
+    const fieldPatterns = {
+      payment_token: /payment_token:\s*'([^']*)'/,
+      payment_original_amount: /payment_original_amount:\s*'([^']*)'/,
+      payment_currency_code: /payment_currency_code:\s*'([^']*)'/,
+      payment_failure_message: /payment_failure_message:\s*'([^']*)'/,
+      payment_method_type_type: /payment_method_type_type:\s*'([^']*)'/
+    };
+
+    // Iterate over each hit to find the fields inside the params
+    hits.forEach((hit) => {
+      const source = hit._source;
+
+      // Check if params field exists and is not empty
+      if (source.params) {
+        // Search for each field pattern in the params string
+        Object.keys(fieldPatterns).forEach((fieldName) => {
+          const pattern = fieldPatterns[fieldName];
+          const match = source.params.match(pattern);
+          
+          if (match && match[1]) {
+            // Normalize the value by trimming whitespace
+            const normalizedValue = match[1].trim();
+            
+            // Only set if it hasn't been set yet
+            if (!uniqueDetails[fieldName]) {
+              uniqueDetails[fieldName] = normalizedValue;
+              console.log(`Found ${fieldName}: ${normalizedValue}`); // Log the found value
+            }
+          }
+        });
+      }
+    });
+
+    // Log the entire uniqueDetails object
+    console.log('Unique Details Extracted:', uniqueDetails);
+
+    return uniqueDetails;
+  }
+
   // Function to generate HTML for a single occurrence
   function generateOccurrenceHtml(index, details) {
     return `
-      <div class="card mb-3 shadow-sm border-info">
-        <div class="card-header bg-info text-white">
-          <h5 class="card-title mb-0">Occurrence ${index + 1}</h5>
+      <div class="card mb-3 shadow-sm border-danger">
+        <div class="card-header bg-danger text-white">
+          <h5 class="card-title mb-0">Occurrence ${index + 1} <i class="fas fa-exclamation-triangle"></i></h5>
         </div>
         <div class="card-body">
           <div class="row mb-2">
@@ -68,7 +195,7 @@ function analyzeLogs() {
             <div class="col-sm-9">${details.time}</div>
           </div>
           <details class="mt-3">
-            <summary class="btn btn-info btn-sm">Show Params</summary>
+            <summary class="btn btn-danger btn-sm"><i class="fas fa-cogs"></i> Show Params</summary>
             <pre><code>${details.params}</code></pre>
           </details>
         </div>
@@ -76,12 +203,28 @@ function analyzeLogs() {
     `;
   }
 
+  // Function to generate HTML for the table of unique details
+  function generateDetailsTable(uniqueDetails) {
+    let tableHtml = '<h3 class="mt-4">Important Details <i class="fas fa-info-circle"></i></h3>';
+    tableHtml += '<table class="table table-striped mb-4">';
+    tableHtml += '<thead><tr><th>Field</th><th>Value</th></tr></thead>';
+    tableHtml += '<tbody>';
+
+    Object.keys(uniqueDetails).forEach(field => {
+      const value = uniqueDetails[field];
+      tableHtml += `<tr><td>${field}</td><td>${value}</td></tr>`;
+    });
+
+    tableHtml += '</tbody></table>';
+    return tableHtml;
+  }
+
   // Parse the logs
   const hits = parseLogs(logs);
 
   // Analyze logs for errors
-  let results = `<h2 class="mb-4">Log Analysis Results</h2>`;
-  results += `<div class="alert alert-info mb-4" role="alert">Total Hits: ${totalHits}</div>`;
+  let results = `<h2 class="mb-4">Log Analysis Results <i class="fas fa-chart-line"></i></h2>`;
+  results += `<div class="alert alert-info mb-4" role="alert"><i class="fas fa-tachometer-alt"></i> Total Hits: ${totalHits}</div>`;
 
   // Create a placeholder for the canvases
   results += '<div class="row" id="canvasPlaceholder"></div>';
@@ -115,15 +258,27 @@ function analyzeLogs() {
   const sortedLabels = Object.entries(labelCounts).sort((a, b) => b[1] - a[1]);
 
   // Add label counts to results
-  results += '<h3 class="mt-4">Label Counts</h3>';
+  results += '<h3 class="mt-4">Label Counts <i class="fas fa-tag"></i></h3>';
   results += '<ul class="list-group mb-4">';
   sortedLabels.forEach(([label, count]) => {
     results += `<li class="list-group-item d-flex justify-content-between align-items-center"><span class="badge bg-info rounded-pill"> ${label}</span> <span class="badge bg-primary rounded-pill">${count}</span></li>`;
   });
   results += '</ul>';
 
+  // Extract and display important details
+  const uniqueDetails = extractUniqueDetails(hits);
+  if (Object.keys(uniqueDetails).length > 0) {
+    results += generateDetailsTable(uniqueDetails);
+  }
+
+  // Extract and display connectors service details
+  const connectorsServiceDetails = extractConnectorsServiceDetails(hits);
+  if (connectorsServiceDetails.length > 0) {
+    results += generateConnectorsServiceHtml(connectorsServiceDetails);
+  }
+
   // Display the results
-  document.getElementById('analysisResults').innerHTML = results + occurrencesHtml || '<div class="alert alert-warning" role="alert">No significant issues detected.</div>';
+  document.getElementById('analysisResults').innerHTML = results + occurrencesHtml || '<div class="alert alert-warning" role="alert"><i class="fas fa-exclamation-circle"></i> No significant issues detected.</div>';
 
   // Extract timing data from ISO 8601 time
   const timingData = hits.map(hit => new Date(hit._source.time).getTime()).filter(time => !isNaN(time));
