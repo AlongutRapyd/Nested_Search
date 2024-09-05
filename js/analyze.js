@@ -153,6 +153,24 @@ function generateConnectorsServiceHtml(details) {
     return patterns.some(pattern => pattern.test(logEntry));
   }
 
+  // Define field icons at the top level or an appropriate scope
+  const fieldIcons = {
+    payment_token: 'fas fa-credit-card',
+    payment_original_amount: 'fas fa-dollar-sign',
+    payment_currency_code: 'fas fa-money-bill',
+    payment_failure_code: 'fas fa-exclamation-triangle',
+    payment_failure_message: 'fas fa-comment-dots',
+    payment_method_type_type: 'fas fa-credit-card',
+    reference_id: 'fas fa-id-badge',
+    gateway: 'fas fa-network-wired',
+    payout_token: 'fas fa-credit-card',
+    payout_original_amount: 'fas fa-dollar-sign',
+    payout_currency_code: 'fas fa-money-bill',
+    payout_failure_code: 'fas fa-exclamation-triangle',
+    payout_failure_message: 'fas fa-comment-dots',
+    payout_method_type_type: 'fas fa-credit-card'
+  };
+
   // Function to extract unique important details from the params field without JSON parsing
   function extractUniqueDetails(hits) {
     const uniqueDetails = {};
@@ -206,6 +224,28 @@ function generateConnectorsServiceHtml(details) {
     return uniqueDetails;
   }
 
+  // Function to generate HTML for the table of unique details
+  function generateDetailsTable(uniqueDetails) {
+    let tableHtml = '<h3 class="mt-4">Important Details <i class="fas fa-info-circle"></i></h3>';
+    tableHtml += '<table class="table table-striped mb-4">';
+    tableHtml += '<thead><tr><th>Field</th><th>Value</th></tr></thead>';
+    tableHtml += '<tbody>';
+
+    Object.keys(uniqueDetails).forEach(field => {
+      const value = uniqueDetails[field];
+      // Get the icon for the field
+      const icon = fieldIcons[field] || 'fas fa-question-circle'; // Default icon if not found
+      tableHtml += `
+        <tr>
+          <td><i class="${icon}"></i> ${field.replace(/_/g, ' ').toUpperCase()}</td>
+          <td>${value}</td>
+        </tr>`;
+    });
+
+    tableHtml += '</tbody></table>';
+    return tableHtml;
+  }
+
   // Function to generate HTML for a single occurrence
   function generateOccurrenceHtml(index, details) {
     return `
@@ -237,22 +277,6 @@ function generateConnectorsServiceHtml(details) {
         </div>
       </div>
     `;
-  }
-
-  // Function to generate HTML for the table of unique details
-  function generateDetailsTable(uniqueDetails) {
-    let tableHtml = '<h3 class="mt-4">Important Details <i class="fas fa-info-circle"></i></h3>';
-    tableHtml += '<table class="table table-striped mb-4">';
-    tableHtml += '<thead><tr><th>Field</th><th>Value</th></tr></thead>';
-    tableHtml += '<tbody>';
-
-    Object.keys(uniqueDetails).forEach(field => {
-      const value = uniqueDetails[field];
-      tableHtml += `<tr><td>${field}</td><td>${value}</td></tr>`;
-    });
-
-    tableHtml += '</tbody></table>';
-    return tableHtml;
   }
 
   // Parse the logs
