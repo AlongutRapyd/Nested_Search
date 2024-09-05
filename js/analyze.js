@@ -33,6 +33,11 @@ function analyzeLogs() {
 function extractConnectorsServiceDetails(hits) {
   const connectorsServiceDetails = [];
 
+  // Regular expressions to match URIs or URLs
+  const uriOrUrlPattern = /https?:\/\/[^\s]+/i;
+  // Regular expression to match HTTP methods
+  const httpMethodPattern = /method:\s*'(POST|GET|PUT|DELETE|PATCH|OPTIONS|HEAD)'/i;
+
   hits.forEach(hit => {
     const source = hit._source;
 
@@ -41,9 +46,16 @@ function extractConnectorsServiceDetails(hits) {
       const message = source.message || '';
       const params = source.params || '';
 
-      // Find request logs
-      if ((/makeRawRequest/.test(message) || /makeCustomRequest/.test(message)) &&
-      (/options_data/.test(message) || /input/.test(message))) {
+      // Check if params contain URI/URL and HTTP method
+      const containsUriOrUrl = uriOrUrlPattern.test(params);
+      const containsHttpMethod = httpMethodPattern.test(params);
+
+      // Find request logs with URI/URL and HTTP method in params
+      if (
+        (/options_data/.test(message) || /input/.test(message)) &&
+        containsUriOrUrl &&
+        containsHttpMethod
+      ) {
         connectorsServiceDetails.push({
           label: source.label || 'N/A',
           level: source.level || 'N/A',
@@ -55,7 +67,15 @@ function extractConnectorsServiceDetails(hits) {
       }
 
       // Find response logs
-      if (/makeRawRequest/.test(message) && (/response/.test(message) || /error/.test(message))) {
+      if (
+        (/makeRawRequest/.test(message) || /makeCustomRequest/.test(message)) &&
+        (
+          /error/.test(message) ||
+          (
+            /response/.test(message) && ! /resolve_with_full_response/.test(message)
+          )
+        )
+      ) {
         connectorsServiceDetails.push({
           label: source.label || 'N/A',
           level: source.level || 'N/A',
@@ -142,8 +162,17 @@ function generateConnectorsServiceHtml(details) {
       payment_token: /payment_token:\s*'([^']*)'/,
       payment_original_amount: /payment_original_amount:\s*'([^']*)'/,
       payment_currency_code: /payment_currency_code:\s*'([^']*)'/,
+      payment_failure_code: /payment_failure_code:\s*'([^']*)'/,
       payment_failure_message: /payment_failure_message:\s*'([^']*)'/,
-      payment_method_type_type: /payment_method_type_type:\s*'([^']*)'/
+      payment_method_type_type: /payment_method_type_type:\s*'([^']*)'/,
+      reference_id: /reference_id:\s*'([^']*)'/,
+      gateway: /gc_type:\s*'([^']*)'/,
+      payout_token: /payout_token:\s*'([^']*)'/,
+      payout_original_amount: /payout_original_amount:\s*'([^']*)'/,
+      payout_currency_code: /payout_currency_code:\s*'([^']*)'/,
+      payout_failure_code: /payout_failure_code:\s*'([^']*)'/,
+      payout_failure_message: /payout_failure_message:\s*'([^']*)'/,
+      payout_method_type_type: /payout_method_type_type:\s*'([^']*)'/
     };
 
     // Iterate over each hit to find the fields inside the params
@@ -240,8 +269,10 @@ function generateConnectorsServiceHtml(details) {
   let occurrencesHtml = '';
   let occurrenceIndex = 0;
   hits.forEach((hit) => {
-    const logEntry = JSON.stringify(hit._source); // Convert hit to a JSON string for pattern matching
-    if (matchesPatterns(logEntry, errorPatterns)) {
+    const source = hit._source;
+
+    // Check if the label is 'error' or 'warning'
+    if (source.level === 'error' || source.level === 'warning') {
       const details = extractDetails(hit);
       occurrencesHtml += generateOccurrenceHtml(occurrenceIndex++, details);
     }
