@@ -71,44 +71,51 @@ function extractConnectorsServiceDetails(hits) {
   return connectorsServiceDetails;
 }
 
-  // Function to generate HTML for connectors service details
-  function generateConnectorsServiceHtml(details) {
-    let html = '<h3 class="mt-4">Connectors Service Details</h3>';
-    
-    details.forEach((detail, index) => {
-      html += `
-        <div class="card mb-3 shadow-sm border-danger">
-          <div class="card-header bg-danger text-white">
-            <h5 class="card-title mb-0">${detail.type.charAt(0).toUpperCase() + detail.type.slice(1)} ${index + 1} <i class="fas fa-exclamation-triangle"></i></h5>
-          </div>
-          <div class="card-body">
-            <div class="row mb-2">
-              <div class="col-sm-3"><strong>Label:</strong></div>
-              <div class="col-sm-9"><span class="badge bg-secondary">${detail.label}</span></div>
-            </div>
-            <div class="row mb-2">
-              <div class="col-sm-3"><strong>Level:</strong></div>
-              <div class="col-sm-9"><span class="badge bg-warning text-dark">${detail.level}</span></div>
-            </div>
-            <div class="row mb-2">
-              <div class="col-sm-3"><strong>Message:</strong></div>
-              <div class="col-sm-9">${detail.message}</div>
-            </div>
-            <div class="row mb-2">
-              <div class="col-sm-3"><strong>Time:</strong></div>
-              <div class="col-sm-9">${detail.time}</div>
-            </div>
-            <details class="mt-3">
-              <summary class="btn btn-danger btn-sm"><i class="fas fa-cogs"></i> Show Params</summary>
-              <pre><code>${detail.params}</code></pre>
-            </details>
-          </div>
-        </div>
-      `;
-    });
+// Function to generate HTML for connectors service details
+function generateConnectorsServiceHtml(details) {
+  let html = '<h3 class="mt-4">Connectors Service Details</h3>';
+  
+  details.forEach((detail, index) => {
+    let icon;
+    if (detail.type === 'request') {
+      icon = '<i class="fas fa-sign-in-alt"></i>'; // Icon for request
+    } else if (detail.type === 'response') {
+      icon = '<i class="fas fa-sign-out-alt"></i>'; // Icon for response
+    }
 
-    return html;
-  }
+    html += `
+      <div class="card mb-3 shadow-sm border-info">
+        <div class="card-header bg-info text-white">
+          <h5 class="card-title mb-0">${icon} ${detail.type.charAt(0).toUpperCase() + detail.type.slice(1)} ${index + 1} <i class="fas fa-exclamation-triangle"></i></h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-2">
+            <div class="col-sm-3"><strong>Label:</strong></div>
+            <div class="col-sm-9"><span class="badge bg-secondary">${detail.label}</span></div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-sm-3"><strong>Level:</strong></div>
+            <div class="col-sm-9"><span class="badge bg-warning text-dark">${detail.level}</span></div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-sm-3"><strong>Message:</strong></div>
+            <div class="col-sm-9">${detail.message}</div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-sm-3"><strong>Time:</strong></div>
+            <div class="col-sm-9">${detail.time}</div>
+          </div>
+          <details class="mt-3">
+            <summary class="btn btn-danger btn-sm"><i class="fas fa-cogs"></i> Show Params</summary>
+            <pre><code>${detail.params}</code></pre>
+          </details>
+        </div>
+      </div>
+    `;
+  });
+
+  return html;
+}
 
   // Function to extract and format detailed information
   function extractDetails(hit) {
