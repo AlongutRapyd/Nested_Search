@@ -481,4 +481,70 @@ function generateConnectorsServiceHtml(details) {
       }
     }
   });
+
+  function generateAnalysisResults(details) {
+    return `
+    Log Analysis Results:
+    Gateway: ${details.gateway || 'N/A'}
+    Payment Token: ${details.payment_token || 'N/A'}
+    Payment Original Amount: ${details.payment_original_amount || 'N/A'}
+    Currency Code: ${details.payment_currency_code || 'N/A'}
+    Payout Token: ${details.payout_token || 'N/A'}
+    Payout Original Amount: ${details.payout_original_amount || 'N/A'}
+    Payout Currency Code: ${details.payout_currency_code || 'N/A'}`;
+}
+
+function generateEmailContent(details) {
+  let emailBody = "Dear Team,\n\n";
+  
+  emailBody += "Please provide help regarding the following details:\n";
+
+  if (details.gateway) emailBody += `- Gateway: ${details.gateway}\n`;
+  if (details.payment_token) emailBody += `- Payment Token: ${details.payment_token}\n`;
+  if (details.payment_original_amount) emailBody += `- Payment Original Amount: ${details.payment_original_amount}\n`;
+  if (details.payment_currency_code) emailBody += `- Currency Code: ${details.payment_currency_code}\n`;
+  if (details.payout_token) emailBody += `- Payout Token: ${details.payout_token}\n`;
+  if (details.payout_original_amount) emailBody += `- Payout Original Amount: ${details.payout_original_amount}\n`;
+  if (details.payout_currency_code) emailBody += `- Payout Currency Code: ${details.payout_currency_code}\n`;
+  
+  emailBody += "\nThank you for your assistance!";
+
+  // Append the email content to the emailOutput area
+  const emailOutputElement = document.getElementById('emailOutput');
+  emailOutputElement.innerHTML = `
+    <div class="email-content">
+      <strong>Email to Team:</strong>
+      <pre id="emailContent" class="border p-3 bg-light" style="white-space: pre-wrap;">${emailBody}</pre>
+      <button onclick="copyToClipboard()" class="btn btn-success mt-2">Copy to Clipboard</button>
+      <button onclick="clearEmail()" class="btn btn-danger mt-2 ms-2">Clear</button>
+      <div id="copyFeedback" class="mt-2" style="display:none; color: green;">Email content copied to clipboard!</div>
+    </div>`;
+  
+  // Show the email output section
+  emailOutputElement.classList.remove('d-none'); // Remove d-none class to show it
+}
+
+generateEmailContent(uniqueDetails);
+}
+
+// Function to copy email content to clipboard
+function copyToClipboard() {
+  const emailContent = document.getElementById('emailContent').innerText;
+  navigator.clipboard.writeText(emailContent)
+    .then(() => {
+      const feedbackElement = document.getElementById('copyFeedback');
+      feedbackElement.style.display = 'block'; // Show feedback
+      setTimeout(() => {
+        feedbackElement.style.display = 'none'; // Hide feedback after 3 seconds
+      }, 3000);
+    })
+    .catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+}
+
+// Function to clear the email content
+function clearEmail() {
+  const emailOutputElement = document.getElementById('emailOutput');
+  emailOutputElement.classList.add('d-none'); // Hide the email output section
 }
