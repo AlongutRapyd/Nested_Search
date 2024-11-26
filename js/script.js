@@ -373,21 +373,32 @@ function extractPaymentAndPayoutTokens() {
       }
   }
 
+  let paymentTokensSet = new Set(paymentTokens);
+  let payoutTokensSet = new Set(payoutTokens);
+  
   // Prepare output strings
   let paymentOutput = '';
   let payoutOutput = '';
-
-  if (paymentTokens.length > 0) {
-      paymentOutput = paymentTokens.map(token => `<li>${token}</li>`).join('');
+  
+  // Use .size to check the number of elements in the set
+  if (paymentTokensSet.size > 0) {
+      // Convert Set to array using spread operator to use .map() 
+      paymentOutput = [...paymentTokensSet].map(token => `<li>${token}</li>`).join('');
   } else {
       paymentOutput = '<li>No payment tokens found.</li>';
   }
-
-  if (payoutTokens.length > 0) {
-      payoutOutput = payoutTokens.map(token => `<li>${token}</li>`).join('');
+  
+  if (payoutTokensSet.size > 0) {
+      // Convert Set to array using spread operator to use .map() 
+      payoutOutput = [...payoutTokensSet].map(token => `<li>${token}</li>`).join('');
   } else {
       payoutOutput = '<li>No payout tokens found.</li>';
   }
+  
+  // Wrap the lists in <ol> tags
+  paymentOutput = `<ol>${paymentOutput}</ol>`;
+  payoutOutput = `<ol>${payoutOutput}</ol>`;  
+
 
   // Display the output
   const paymentTokensList = document.getElementById('paymentTokensList');
