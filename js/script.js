@@ -345,12 +345,19 @@ function showAlert(message) {
 function extractPaymentAndPayoutTokens() {
   const inputData = document.getElementById('inputData').value.trim();
 
-  // Check if input data is empty
-  if (!inputData) {
-      showError('Input data is empty.');
-      return;
-  }
+    // Check if input data is empty
+    if (!inputData) {
+        const errorDiv = document.getElementById('error');
+        errorDiv.textContent = 'Input data is empty.';  // Set the error message
+        errorDiv.style.display = 'block';  // Make the error div visible
+        document.getElementById('output').style.display = 'none';
+        return;
+    }
 
+    // If input data is not empty, hide the error div
+    const errorDiv = document.getElementById('error');
+    errorDiv.style.display = 'none';  // Hide the error div
+  
   // Split the input data into words
   const words = inputData.split(/\s+/);
 
