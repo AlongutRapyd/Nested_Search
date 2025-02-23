@@ -214,7 +214,7 @@ function convertJsonQuery() {
 
 function generateOutputJsonQuery(inputJson, alertTimeFrame) {
   const outputJson = {
-      size: 0,
+      size: 5000,
       query: {
           bool: {
               must: [],
