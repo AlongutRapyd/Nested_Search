@@ -160,7 +160,7 @@ function convertJson() {
 
     // Construct the query object
     const query = {
-        size: 0,
+        size: 5000,
         query: {
             bool: {
                 must: [timeRange].concat(mustFilters),
